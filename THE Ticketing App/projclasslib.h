@@ -7,8 +7,10 @@ using namespace std;
 
 enum class EventType{Movie, Play, Match};
 
-struct Eveniment {
+struct Event {
 
 private:
-
+	string nameOfEvent{};
+	char* date{};
+	char* openingTime{};
 };
