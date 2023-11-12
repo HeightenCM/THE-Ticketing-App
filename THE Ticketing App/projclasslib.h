@@ -5,9 +5,14 @@
 
 using namespace std;
 
-//struct Utility {
-//
-//};
+struct Utility {
+	static char* copyArray(const char* sourceArray) {
+		size_t sizeOfSourceArray = strlen(sourceArray) + 1;
+		char* copy = new char[sizeOfSourceArray];
+		strcpy_s(copy, sizeOfSourceArray, sourceArray);
+		return copy;
+	}
+};
 
 //class listsOfStuff {
 //
@@ -29,7 +34,7 @@ struct Event {
 	}
 
 	char* getDate() {
-		//copystring func
+		return Utility::copyArray(this->dateOfEvent);
 	}
 	bool setDate(const char* dateOfEvent) {
 		size_t lengthOfString = strlen(dateOfEvent) + 1;
@@ -38,7 +43,7 @@ struct Event {
 	}
 	
 	char* getTime() {
-		//copystring func
+		return Utility::copyArray(this->openingTime);
 	}
 	bool setTime(const char* openingTime) {
 		size_t lengthOfString = strlen(openingTime) + 1;
