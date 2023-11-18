@@ -18,17 +18,13 @@ struct Utility {
 	}
 };
 
-//class listsOfStuff {
-//
-//};
-
 struct Event {
 	string getName() {
 		return nameOfEvent;
 	}
 	bool setName(string nameOfEvent) {
 		cout << "(max character limit set at 30, min set at 5) ";
-		if (!(strlen(nameOfEvent.c_str())<5||strlen(nameOfEvent.c_str())>30)) {
+		if (!(strlen(nameOfEvent.c_str()) < 5 || strlen(nameOfEvent.c_str()) > 30)) {
 			this->nameOfEvent = nameOfEvent;
 			return true;
 		}
@@ -45,7 +41,7 @@ struct Event {
 			return true;
 		}
 		return false;
-			
+
 	}
 
 	char* getDate() {
@@ -55,7 +51,7 @@ struct Event {
 		cout << "(date is of the type YYYY/MM/DD) ";
 		if (strlen(dateOfEvent) == 10) {
 			if (dateOfEvent[4] == '/' || dateOfEvent[7] == '/') {
-				if (Utility::isNumeric(dateOfEvent[0])&&Utility::isNumeric(dateOfEvent[1])&&Utility::isNumeric(dateOfEvent[2])&&Utility::isNumeric(dateOfEvent[3])){
+				if (Utility::isNumeric(dateOfEvent[0]) && Utility::isNumeric(dateOfEvent[1]) && Utility::isNumeric(dateOfEvent[2]) && Utility::isNumeric(dateOfEvent[3])) {
 					if (Utility::isNumeric(dateOfEvent[5]) && Utility::isNumeric(dateOfEvent[6])) {
 						if (Utility::isNumeric(dateOfEvent[8]) && Utility::isNumeric(dateOfEvent[9])) {
 							size_t lengthOfString = strlen(dateOfEvent) + 1;
@@ -74,7 +70,7 @@ struct Event {
 		else cout << "\nInvalid or misspelled date format! Size doesn't match format type!\n";
 		return false;
 	}
-	
+
 	char* getTime() {
 		return Utility::copyArray(this->openingTime);
 	}
@@ -110,7 +106,7 @@ struct Event {
 		}
 		return false;
 	}
-	
+
 	int getSeats() {
 		return noOfSeats;
 	}
@@ -122,7 +118,7 @@ struct Event {
 		}
 		return false;
 	}
-	
+
 	int getZones() {
 		return noOfZones;
 	}
@@ -142,6 +138,8 @@ private:
 	int noOfRows{}, noOfSeats{}, noOfZones{};
 };
 
-//struct Ticket {
-//	
-//};
+struct Ticket {
+
+private:
+	int ticketID{};
+};
