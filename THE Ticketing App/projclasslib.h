@@ -110,9 +110,27 @@ struct Event {
 	bool setZones(string* zones, int noOfZones) {
 		if (noOfZones > 5 || zones == nullptr)return false;
 		this->noOfZones = noOfZones;
+		delete[] this->zones;
 		this->zones = new string[noOfZones];
 		for (int i = 0; i < noOfZones; i++) {
 			this->zones[i] = zones[i];
+		}
+		return true;
+	}
+
+	int* getSeatsPerZone() const{
+		int* copy = new int[this->noOfZones];
+		for (int i = 0; i < this->noOfZones; i++) {
+			copy[i] = this->seatsPerZone[i];
+		}
+		return copy;
+	}
+	bool setSeatsPerZone(int* seatsPerZone, int noOfZones) {
+		if (noOfZones != this->noOfZones)return false;
+		delete[] this->seatsPerZone;
+		this->seatsPerZone = new int[this->noOfZones];
+		for (int i = 0; i < this->noOfZones; i++) {
+			this->seatsPerZone[i] = seatsPerZone[i];
 		}
 		return true;
 	}
@@ -123,6 +141,8 @@ private:
 	char* dateOfEvent{};
 	char* openingTime{};
 	int MAX_NO_OF_SEATS{}, noOfZones{};
+	int* seatsPerZone{};
+	const int eventID;
 };
 
 struct Ticket {
@@ -133,6 +153,15 @@ private:
 };
 
 class Manager {
-	Event* eventList;
-	Ticket* ticketList[];
+	Event* eventList{};
+	Ticket* ticketList{};
+
+public:
+	string* getEvents() {
+		/*string* copy = new string[this->noOfZones];
+		for (int i = 0; i < this->noOfZones; i++) {
+			copy[i] = this->zones[i];
+		}
+		return copy;*/
+	}
 };
