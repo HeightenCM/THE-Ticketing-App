@@ -148,6 +148,7 @@ private:
 struct Ticket {
 
 private:
+	const int eventID;
 	const int ticketID;
 	int seatNo{};
 };
@@ -155,13 +156,14 @@ private:
 class Manager {
 	Event* eventList{};
 	Ticket* ticketList{};
+	int noOfEvents{};
 
 public:
 	string* getEvents() {
-		/*string* copy = new string[this->noOfZones];
-		for (int i = 0; i < this->noOfZones; i++) {
-			copy[i] = this->zones[i];
+		if (noOfEvents == 0)return nullptr;
+		string* listOfEvents = new string[noOfEvents];
+		for (int i = 0; i < noOfEvents; i++) {
+			listOfEvents[i] = this->eventList[i].getName();
 		}
-		return copy;*/
 	}
 };
