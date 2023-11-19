@@ -19,11 +19,10 @@ struct Utility {
 };
 
 struct Event {
-	string getName() {
+	string getName() const{
 		return nameOfEvent;
 	}
 	bool setName(string nameOfEvent) {
-		cout << "(max character limit set at 30, min set at 5) ";
 		if (!(strlen(nameOfEvent.c_str()) < 5 || strlen(nameOfEvent.c_str()) > 30)) {
 			this->nameOfEvent = nameOfEvent;
 			return true;
@@ -31,11 +30,10 @@ struct Event {
 		return false;
 	}
 
-	string getLocation() {
+	string getLocation() const{
 		return locationOfEvent;
 	}
 	bool setLocation(string locationOfEvent) {
-		cout << "(max character limit set at 80, min at 5) ";
 		if (!(strlen(locationOfEvent.c_str()) < 5 || strlen(locationOfEvent.c_str()) > 30)) {
 			this->locationOfEvent = locationOfEvent;
 			return true;
@@ -44,11 +42,10 @@ struct Event {
 
 	}
 
-	char* getDate() {
+	char* getDate() const{
 		return Utility::copyArray(this->dateOfEvent);
 	}
 	bool setDate(const char* dateOfEvent) {
-		cout << "(date is of the type YYYY/MM/DD) ";
 		if (strlen(dateOfEvent) == 10) {
 			if (dateOfEvent[4] == '/' || dateOfEvent[7] == '/') {
 				if (Utility::isNumeric(dateOfEvent[0]) && Utility::isNumeric(dateOfEvent[1]) && Utility::isNumeric(dateOfEvent[2]) && Utility::isNumeric(dateOfEvent[3])) {
@@ -71,11 +68,10 @@ struct Event {
 		return false;
 	}
 
-	char* getTime() {
+	char* getTime() const{
 		return Utility::copyArray(this->openingTime);
 	}
 	bool setTime(const char* openingTime) {
-		cout << "(time is of the type HH:MM)";
 		if (strlen(openingTime) == 5) {
 			if (openingTime[2] == ':') {
 				if (Utility::isNumeric(openingTime[0]) && Utility::isNumeric(openingTime[1])) {
@@ -94,52 +90,49 @@ struct Event {
 		else cout << "\nInvalid time format! Size doesn't match format type!\n";
 		return false;
 	}
-
-	int getRows() {
-		return noOfRows;
+	
+	int getMaxSeats() const{
+		return this->MAX_NO_OF_SEATS;
 	}
-	bool setRows(int noOfRows) {
-		cout << "(max value set at 10000, min set at 10) ";
-		if (!(noOfRows < 10 || noOfRows>10000)) {
-			this->noOfRows = noOfRows;
-			return true;
-		}
-		return false;
+	bool setMaxSeats(int MaxSeats) {
+		if (MaxSeats < this->MAX_NO_OF_SEATS) return false;
+		this->MAX_NO_OF_SEATS = MaxSeats;
+		return true;
 	}
 
-	int getSeats() {
-		return noOfSeats;
-	}
-	bool setSeats(int noOfSeats) {
-		cout << "(max value set at 100, min set at 1) ";
-		if (!(noOfRows < 1 || noOfRows>100)) {
-			this->noOfSeats = noOfSeats;
-			return true;
+	string* getZones() const{
+		string* copy = new string[this->noOfZones];
+		for (int i = 0; i < this->noOfZones; i++) {
+			copy[i] = this->zones[i];
 		}
-		return false;
+		return copy;
 	}
-
-	int getZones() {
-		return noOfZones;
-	}
-	bool setZones(int noOfZones) {
-		cout << "(max value set at 1, min set at 5) ";
-		if (!(noOfRows < 1 || noOfRows>5)) {
-			this->noOfZones = noOfZones;
-			return true;
+	bool setZones(string* zones, int noOfZones) {
+		if (noOfZones > 5 || zones == nullptr)return false;
+		this->noOfZones = noOfZones;
+		this->zones = new string[noOfZones];
+		for (int i = 0; i < noOfZones; i++) {
+			this->zones[i] = zones[i];
 		}
-		return false;
+		return true;
 	}
 
 private:
+	string* zones{};
 	string nameOfEvent{}, locationOfEvent{};
 	char* dateOfEvent{};
 	char* openingTime{};
-	int noOfRows{}, noOfSeats{}, noOfZones{};
+	int MAX_NO_OF_SEATS{}, noOfZones{};
 };
 
 struct Ticket {
 
 private:
-	int ticketID{};
+	const int ticketID;
+	int seatNo{};
+};
+
+class Manager {
+	Event* eventList;
+	Ticket* ticketList[];
 };
