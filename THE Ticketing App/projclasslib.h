@@ -5,6 +5,11 @@
 
 using namespace std;
 
+struct Seat;
+struct Row;
+struct Zone;
+struct Event;
+
 struct Utility {
 	static char* copyArray(const char* sourceArray) {
 		size_t sizeOfSourceArray = strlen(sourceArray) + 1;
@@ -42,19 +47,16 @@ struct Event {
 
 	}
 
-	char* getDate() const{
-		return Utility::copyArray(this->dateOfEvent);
+	string getDate() const{
+		return this->dateOfEvent;
 	}
-	bool setDate(const char* dateOfEvent) {
-		if (strlen(dateOfEvent) == 10) {
+	bool setDate(string dateOfEvent) {
+		if (dateOfEvent.size() == 10) {
 			if (dateOfEvent[4] == '/' || dateOfEvent[7] == '/') {
 				if (Utility::isNumeric(dateOfEvent[0]) && Utility::isNumeric(dateOfEvent[1]) && Utility::isNumeric(dateOfEvent[2]) && Utility::isNumeric(dateOfEvent[3])) {
 					if (Utility::isNumeric(dateOfEvent[5]) && Utility::isNumeric(dateOfEvent[6])) {
 						if (Utility::isNumeric(dateOfEvent[8]) && Utility::isNumeric(dateOfEvent[9])) {
-							size_t lengthOfString = strlen(dateOfEvent) + 1;
-							this->dateOfEvent = new char[lengthOfString];
-							strcpy_s(this->dateOfEvent, lengthOfString, dateOfEvent);
-							return true;
+							this->dateOfEvent = dateOfEvent;
 						}
 						else cout << "\nInvalid format! Day specifier is wrong!\n";
 					}
@@ -68,18 +70,15 @@ struct Event {
 		return false;
 	}
 
-	char* getTime() const{
-		return Utility::copyArray(this->openingTime);
+	string getTime() const{
+		return this->openingTime;
 	}
-	bool setTime(const char* openingTime) {
-		if (strlen(openingTime) == 5) {
+	bool setTime(string openingTime) {
+		if (openingTime.length() == 5) {
 			if (openingTime[2] == ':') {
 				if (Utility::isNumeric(openingTime[0]) && Utility::isNumeric(openingTime[1])) {
 					if (Utility::isNumeric(openingTime[3]) && Utility::isNumeric(openingTime[4])) {
-						size_t lengthOfString = strlen(openingTime) + 1;
-						this->openingTime = new char[lengthOfString];
-						strcpy_s(this->openingTime, lengthOfString, openingTime);
-						return true;
+						this->openingTime = openingTime;
 					}
 					else cout << "\nInvalid format! Minute specifier isn't numeric!\n";
 				}
@@ -100,49 +99,36 @@ struct Event {
 		return true;
 	}
 
-	string* getZones() const{
-		string* copy = new string[this->noOfZones];
-		for (int i = 0; i < this->noOfZones; i++) {
-			copy[i] = this->zones[i];
-		}
-		return copy;
-	}
-	bool setZones(string* zones, int noOfZones) {
-		if (noOfZones > 5 || zones == nullptr)return false;
-		this->noOfZones = noOfZones;
-		delete[] this->zones;
-		this->zones = new string[noOfZones];
-		for (int i = 0; i < noOfZones; i++) {
-			this->zones[i] = zones[i];
-		}
-		return true;
-	}
+private:
+	string nameOfEvent{}, locationOfEvent{}, dateOfEvent{}, openingTime{};
+	int MAX_NO_OF_SEATS{}, noOfZones{};
+	const int eventID;
+	Zone* zone{};
+};
 
-	int* getSeatsPerZone() const{
-		int* copy = new int[this->noOfZones];
-		for (int i = 0; i < this->noOfZones; i++) {
-			copy[i] = this->seatsPerZone[i];
-		}
-		return copy;
-	}
-	bool setSeatsPerZone(int* seatsPerZone, int noOfZones) {
-		if (noOfZones != this->noOfZones)return false;
-		delete[] this->seatsPerZone;
-		this->seatsPerZone = new int[this->noOfZones];
-		for (int i = 0; i < this->noOfZones; i++) {
-			this->seatsPerZone[i] = seatsPerZone[i];
-		}
-		return true;
-	}
+struct Zone {
 
 private:
-	string* zones{};
-	string nameOfEvent{}, locationOfEvent{};
-	char* dateOfEvent{};
-	char* openingTime{};
-	int MAX_NO_OF_SEATS{}, noOfZones{};
-	int* seatsPerZone{};
-	const int eventID;
+	string nameOfZone{};
+	int noOfRows{};
+	Row* row{};
+	Zone* nextZone{};
+};
+
+struct Row {
+
+private:
+	char rowLetter{};
+	int noOfSeats{};
+	Seat* seat{};
+	Row* nextRow{};
+};
+
+struct Seat {
+
+private:
+	bool isAccesible{}, isTaken{};
+	Seat* nextSeat{};
 };
 
 struct Ticket {
@@ -151,19 +137,4 @@ private:
 	const int eventID;
 	const int ticketID;
 	int seatNo{};
-};
-
-class Manager {
-	Event* eventList{};
-	Ticket* ticketList{};
-	int noOfEvents{};
-
-public:
-	string* getEvents() {
-		if (noOfEvents == 0)return nullptr;
-		string* listOfEvents = new string[noOfEvents];
-		for (int i = 0; i < noOfEvents; i++) {
-			listOfEvents[i] = this->eventList[i].getName();
-		}
-	}
 };
