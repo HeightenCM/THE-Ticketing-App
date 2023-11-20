@@ -5,6 +5,7 @@
 
 using namespace std;
 
+struct Ticket;
 struct Seat;
 struct Row;
 struct Zone;
@@ -128,6 +129,11 @@ struct Zone {
 		this->noOfRows = noOfRows;
 	}
 
+	void addNewZone(Zone* newZone) {
+		newZone->nextZone = this->nextZone;
+		this->nextZone = newZone;
+	}
+
 private:
 	string nameOfZone{};
 	int noOfRows{};
@@ -145,12 +151,17 @@ struct Row {
 		return true;
 	}
 
-	int getNoOfSeats() const {
+	int getNoOfSeats() const{
 		return this->noOfSeats;
 	}
 	bool setNoOfRows(int noOfSeats) {
 		if (noOfSeats < 1 || noOfSeats > 50)return false;
 		this->noOfSeats = noOfSeats;
+	}
+
+	void addNewRow(Row* newRow) {
+		newRow->nextRow = this->nextRow;
+		this->nextRow = newRow;
 	}
 
 private:
@@ -175,15 +186,19 @@ struct Seat {
 		this->isTaken = true;
 	}
 
+	void addNewSeat(Seat* newSeat) {
+		newSeat->nextSeat = this->nextSeat;
+		this->nextSeat = newSeat;
+	}
+
 private:
 	bool isAccesible{}, isTaken{};
+	Ticket* ticket{};
 	Seat* nextSeat{};
 };
 
 struct Ticket {
 
 private:
-	const int eventID;
 	const int ticketID;
-	Seat* seat{};
 };
