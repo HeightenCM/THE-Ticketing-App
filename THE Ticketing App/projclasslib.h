@@ -90,25 +90,24 @@ struct Event {
 		else cout << "\nInvalid time format! Size doesn't match format type!\n";
 		return false;
 	}
-	
-	int getMaxSeats() const{
-		return this->MAX_NO_OF_SEATS;
-	}
-	bool setMaxSeats(int MaxSeats) {
-		if (MaxSeats < this->MAX_NO_OF_SEATS) return false;
-		this->MAX_NO_OF_SEATS = MaxSeats;
-		return true;
-	}
 
 	int getNoOfZones() const{
 		return this->noOfZones;
 	}
+	bool setNoOfZones(int noOfZones) {
+		if (noOfZones<MIN_ZONE_NO || noOfZones>MAX_ZONE_NO)return false;
+		this->noOfZones = noOfZones;
+		return true;
+	}
 
 private:
 	string nameOfEvent{}, locationOfEvent{}, dateOfEvent{}, openingTime{};
-	int MAX_NO_OF_SEATS{}, noOfZones{};
+	int noOfZones{};
 	const int eventID;
 	Zone* zone{};
+
+	static const int MAX_ZONE_NO{ 10 };
+	static const int MIN_ZONE_NO{ 1 };
 };
 
 struct Zone {
@@ -116,7 +115,7 @@ struct Zone {
 		return this->nameOfZone;
 	}
 	bool setNameOfZone(string nameOfZone) {
-		if (nameOfZone.size() < 3)return false;
+		if (nameOfZone.size() < MIN_NAME_SIZE)return false;
 		this->nameOfZone = nameOfZone;
 		return true;
 	}
@@ -125,7 +124,7 @@ struct Zone {
 		return this->noOfRows;
 	}
 	bool setNoOfRows(int noOfRows) {
-		if (noOfRows < 1 || noOfRows > 50)return false;
+		if (noOfRows < MIN_ROW_NO || noOfRows > MAX_ROW_NO)return false;
 		this->noOfRows = noOfRows;
 	}
 
@@ -139,6 +138,10 @@ private:
 	int noOfRows{};
 	Row* row{};
 	Zone* nextZone{};
+
+	static const int MIN_NAME_SIZE{ 3 };
+	static const int MIN_ROW_NO{ 1 };
+	static const int MAX_ROW_NO{ 50 };
 };
 
 struct Row {
@@ -155,7 +158,7 @@ struct Row {
 		return this->noOfSeats;
 	}
 	bool setNoOfRows(int noOfSeats) {
-		if (noOfSeats < 1 || noOfSeats > 50)return false;
+		if (noOfSeats < MIN_SEAT_NO || noOfSeats > MAX_SEAT_NO)return false;
 		this->noOfSeats = noOfSeats;
 	}
 
@@ -169,6 +172,9 @@ private:
 	int noOfSeats{};
 	Seat* seat{};
 	Row* nextRow{};
+
+	static const int MAX_SEAT_NO{ 50 };
+	static const int MIN_SEAT_NO{ 1 };
 };
 
 struct Seat {
