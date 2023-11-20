@@ -28,7 +28,7 @@ struct Event {
 		return nameOfEvent;
 	}
 	bool setName(string nameOfEvent) {
-		if (!(strlen(nameOfEvent.c_str()) < 5 || strlen(nameOfEvent.c_str()) > 30)) {
+		if (!(nameOfEvent.size() < 5 || nameOfEvent.size() > 30)) {
 			this->nameOfEvent = nameOfEvent;
 			return true;
 		}
@@ -39,7 +39,7 @@ struct Event {
 		return locationOfEvent;
 	}
 	bool setLocation(string locationOfEvent) {
-		if (!(strlen(locationOfEvent.c_str()) < 5 || strlen(locationOfEvent.c_str()) > 30)) {
+		if (!(locationOfEvent.size()<5 || locationOfEvent.size() > 30)) {
 			this->locationOfEvent = locationOfEvent;
 			return true;
 		}
@@ -99,6 +99,10 @@ struct Event {
 		return true;
 	}
 
+	int getNoOfZones() const{
+		return this->noOfZones;
+	}
+
 private:
 	string nameOfEvent{}, locationOfEvent{}, dateOfEvent{}, openingTime{};
 	int MAX_NO_OF_SEATS{}, noOfZones{};
@@ -107,6 +111,22 @@ private:
 };
 
 struct Zone {
+	string getNameOfZone() const{
+		return this->nameOfZone;
+	}
+	bool setNameOfZone(string nameOfZone) {
+		if (nameOfZone.size() < 3)return false;
+		this->nameOfZone = nameOfZone;
+		return true;
+	}
+
+	int getNoOfRows() const{
+		return this->noOfRows;
+	}
+	bool setNoOfRows(int noOfRows) {
+		if (noOfRows < 1 || noOfRows > 50)return false;
+		this->noOfRows = noOfRows;
+	}
 
 private:
 	string nameOfZone{};
@@ -116,6 +136,22 @@ private:
 };
 
 struct Row {
+	char getRowLetter() const{
+		return this->rowLetter;
+	}
+	bool setRowLetter(char rowLetter) {
+		if (rowLetter < 'A' || rowLetter>'Z')return false;
+		this->rowLetter = rowLetter;
+		return true;
+	}
+
+	int getNoOfSeats() const {
+		return this->noOfSeats;
+	}
+	bool setNoOfRows(int noOfSeats) {
+		if (noOfSeats < 1 || noOfSeats > 50)return false;
+		this->noOfSeats = noOfSeats;
+	}
 
 private:
 	char rowLetter{};
@@ -125,6 +161,19 @@ private:
 };
 
 struct Seat {
+	bool getAccesibility() const{
+		return this->isAccesible;
+	}
+	bool setAccesibility() {
+		this->isAccesible = true;
+	}
+	
+	bool isSeatTaken() const{
+		return this->isTaken;
+	}
+	bool sellSeat() {
+		this->isTaken = true;
+	}
 
 private:
 	bool isAccesible{}, isTaken{};
@@ -136,5 +185,5 @@ struct Ticket {
 private:
 	const int eventID;
 	const int ticketID;
-	int seatNo{};
+	Seat* seat{};
 };
