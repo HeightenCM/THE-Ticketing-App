@@ -145,12 +145,17 @@ private:
 };
 
 struct Row {
-	char getRowLetter() const{
-		return this->rowLetter;
+	string getRowLetters() const{
+		string rowLetter = to_string(this->rowLetter[0]) + to_string(this->rowLetter[1]);
+		return rowLetter;
 	}
-	bool setRowLetter(char rowLetter) {
-		if (rowLetter < 'A' || rowLetter>'Z')return false;
-		this->rowLetter = rowLetter;
+	bool setRowLetter(string rowLetter) {
+		for (int i = 0; i < NO_OF_LETTERS; i++) {
+			if (rowLetter[i] < 'A' || rowLetter[i]>'Z')return false;
+		}
+		for (int i = 0; i < NO_OF_LETTERS; i++) {
+			this->rowLetter[i] = rowLetter[i];
+		}
 		return true;
 	}
 
@@ -168,11 +173,12 @@ struct Row {
 	}
 
 private:
-	char rowLetter{};
+	char rowLetter[2];
 	int noOfSeats{};
 	Seat* seat{};
 	Row* nextRow{};
 
+	static const int NO_OF_LETTERS{ 2 };
 	static const int MAX_SEAT_NO{ 50 };
 	static const int MIN_SEAT_NO{ 1 };
 };
