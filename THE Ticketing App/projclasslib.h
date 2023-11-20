@@ -5,6 +5,12 @@
 
 using namespace std;
 
+struct Ticket;
+struct Seat;
+struct Row;
+struct Zone;
+struct Event;
+
 struct Utility {
 	static char* copyArray(const char* sourceArray) {
 		size_t sizeOfSourceArray = strlen(sourceArray) + 1;
@@ -13,51 +19,40 @@ struct Utility {
 		return copy;
 	}
 	static bool isNumeric(const char source) {
-		if (!(source < '0' || source>'9'))return true;
-		else return false;
+		if (source < '0' || source>'9')return false;
+		return true;
 	}
 };
 
 struct Event {
-	string getName() {
-		return nameOfEvent;
+	string getName() const {
+		return this->nameOfEvent;
 	}
 	bool setName(string nameOfEvent) {
-		cout << "(max character limit set at 30, min set at 5) ";
-		if (!(strlen(nameOfEvent.c_str()) < 5 || strlen(nameOfEvent.c_str()) > 30)) {
-			this->nameOfEvent = nameOfEvent;
-			return true;
-		}
-		return false;
+		if (nameOfEvent.size() < MIN_NAME_LOCATION_SIZE || nameOfEvent.size() > MAX_NAME_LOCATION_SIZE) return false;
+		this->nameOfEvent = nameOfEvent;
+		return true;
 	}
 
-	string getLocation() {
-		return locationOfEvent;
+	string getLocation() const {
+		return this->locationOfEvent;
 	}
 	bool setLocation(string locationOfEvent) {
-		cout << "(max character limit set at 80, min at 5) ";
-		if (!(strlen(locationOfEvent.c_str()) < 5 || strlen(locationOfEvent.c_str()) > 30)) {
-			this->locationOfEvent = locationOfEvent;
-			return true;
-		}
-		return false;
-
+		if (locationOfEvent.size() < MIN_NAME_LOCATION_SIZE || locationOfEvent.size() > MAX_NAME_LOCATION_SIZE) return false;
+		this->locationOfEvent = locationOfEvent;
+		return true;
 	}
 
-	char* getDate() {
-		return Utility::copyArray(this->dateOfEvent);
+	string getDate() const {
+		return this->dateOfEvent;
 	}
-	bool setDate(const char* dateOfEvent) {
-		cout << "(date is of the type YYYY/MM/DD) ";
-		if (strlen(dateOfEvent) == 10) {
+	bool setDate(string dateOfEvent) {
+		if (dateOfEvent.size() == 10) {
 			if (dateOfEvent[4] == '/' || dateOfEvent[7] == '/') {
 				if (Utility::isNumeric(dateOfEvent[0]) && Utility::isNumeric(dateOfEvent[1]) && Utility::isNumeric(dateOfEvent[2]) && Utility::isNumeric(dateOfEvent[3])) {
 					if (Utility::isNumeric(dateOfEvent[5]) && Utility::isNumeric(dateOfEvent[6])) {
 						if (Utility::isNumeric(dateOfEvent[8]) && Utility::isNumeric(dateOfEvent[9])) {
-							size_t lengthOfString = strlen(dateOfEvent) + 1;
-							this->dateOfEvent = new char[lengthOfString];
-							strcpy_s(this->dateOfEvent, lengthOfString, dateOfEvent);
-							return true;
+							this->dateOfEvent = dateOfEvent;
 						}
 						else cout << "\nInvalid format! Day specifier is wrong!\n";
 					}
@@ -71,19 +66,15 @@ struct Event {
 		return false;
 	}
 
-	char* getTime() {
-		return Utility::copyArray(this->openingTime);
+	string getTime() const {
+		return this->openingTime;
 	}
-	bool setTime(const char* openingTime) {
-		cout << "(time is of the type HH:MM)";
-		if (strlen(openingTime) == 5) {
+	bool setTime(string openingTime) {
+		if (openingTime.length() == 5) {
 			if (openingTime[2] == ':') {
 				if (Utility::isNumeric(openingTime[0]) && Utility::isNumeric(openingTime[1])) {
 					if (Utility::isNumeric(openingTime[3]) && Utility::isNumeric(openingTime[4])) {
-						size_t lengthOfString = strlen(openingTime) + 1;
-						this->openingTime = new char[lengthOfString];
-						strcpy_s(this->openingTime, lengthOfString, openingTime);
-						return true;
+						this->openingTime = openingTime;
 					}
 					else cout << "\nInvalid format! Minute specifier isn't numeric!\n";
 				}
@@ -95,51 +86,124 @@ struct Event {
 		return false;
 	}
 
-	int getRows() {
-		return noOfRows;
-	}
-	bool setRows(int noOfRows) {
-		cout << "(max value set at 10000, min set at 10) ";
-		if (!(noOfRows < 10 || noOfRows>10000)) {
-			this->noOfRows = noOfRows;
-			return true;
-		}
-		return false;
-	}
-
-	int getSeats() {
-		return noOfSeats;
-	}
-	bool setSeats(int noOfSeats) {
-		cout << "(max value set at 100, min set at 1) ";
-		if (!(noOfRows < 1 || noOfRows>100)) {
-			this->noOfSeats = noOfSeats;
-			return true;
-		}
-		return false;
-	}
-
-	int getZones() {
-		return noOfZones;
-	}
-	bool setZones(int noOfZones) {
-		cout << "(max value set at 1, min set at 5) ";
-		if (!(noOfRows < 1 || noOfRows>5)) {
-			this->noOfZones = noOfZones;
-			return true;
-		}
-		return false;
+	int getNoOfZones() const {
+		return this->noOfZones;
 	}
 
 private:
-	string nameOfEvent{}, locationOfEvent{};
-	char* dateOfEvent{};
-	char* openingTime{};
-	int noOfRows{}, noOfSeats{}, noOfZones{};
+	string nameOfEvent{}, locationOfEvent{}, dateOfEvent{}, openingTime{};
+	const int eventID;
+	int noOfZones{};
+	Zone* zone{};
+
+	static const int MIN_NAME_LOCATION_SIZE{ 3 };
+	static const int MAX_NAME_LOCATION_SIZE{ 50 };
+	static const int MAX_ZONE_NO{ 10 };
+	static const int MIN_ZONE_NO{ 1 };
+};
+
+struct Zone {
+	string getNameOfZone() const {
+		return this->nameOfZone;
+	}
+	bool setNameOfZone(string nameOfZone) {
+		if (nameOfZone.size() < MIN_NAME_SIZE)return false;
+		this->nameOfZone = nameOfZone;
+		return true;
+	}
+
+	int getNoOfRows() const {
+		return this->noOfRows;
+	}
+	bool setNoOfRows(int noOfRows) {
+		if (noOfRows < MIN_ROW_NO || noOfRows > MAX_ROW_NO)return false;
+		this->noOfRows = noOfRows;
+	}
+
+	void addNewZone(Zone* newZone) {
+		newZone->nextZone = this->nextZone;
+		this->nextZone = newZone;
+	}
+
+private:
+	string nameOfZone{};
+	int noOfRows{};
+	Row* row{};
+	Zone* nextZone{};
+
+	static const int MIN_NAME_SIZE{ 3 };
+	static const int MIN_ROW_NO{ 1 };
+	static const int MAX_ROW_NO{ 50 };
+};
+
+struct Row {
+	string getRowLetters() const {
+		string rowLetter = to_string(this->rowLetter[0]) + to_string(this->rowLetter[1]);
+		return rowLetter;
+	}
+
+	int getNoOfSeats() const {
+		return this->noOfSeats;
+	}
+	bool setNoOfRows(int noOfSeats) {
+		if (noOfSeats < MIN_SEAT_NO || noOfSeats > MAX_SEAT_NO)return false;
+		this->noOfSeats = noOfSeats;
+	}
+
+	void addNewRow(Row* newRow) {
+		newRow->nextRow = this->nextRow;
+		this->nextRow = newRow;
+		if (this->rowLetter[1] < 'Z') {
+			newRow->rowLetter[0] = this->rowLetter[0];
+			newRow->rowLetter[1] = this->rowLetter[1] + 1;
+			return;
+		}
+		if (this->rowLetter[1] == 'Z') {
+			newRow->rowLetter[1] = 'A';
+			newRow->rowLetter[0] = this->rowLetter[0] + 1;
+			return;
+		}
+	}
+
+private:
+	char rowLetter[2] = {'A', 'A'};
+	int noOfSeats{};
+	Seat* seat{};
+	Row* nextRow{};
+
+	static const int NO_OF_LETTERS{ 2 };
+	static const int MAX_SEAT_NO{ 50 };
+	static const int MIN_SEAT_NO{ 1 };
+};
+
+struct Seat {
+	int getSeatNo() const {
+		return this->seatNo;
+	}
+
+	bool getAccesibility() const {
+		return this->isAccesible;
+	}
+	bool setAccesibility() {
+		this->isAccesible = true;
+	}
+
+	void addNewSeat(Seat* newSeat) {
+		newSeat->nextSeat = this->nextSeat;
+		this->nextSeat = newSeat;
+		newSeat->seatNo = this->seatNo + 1;
+	}
+
+private:
+	int seatNo{};
+	bool isAccesible{};
+	Ticket* ticket{};
+	Seat* nextSeat{};
 };
 
 struct Ticket {
 
 private:
-	int ticketID{};
+	const int ticketID;
+	string* attributes{};
 };
