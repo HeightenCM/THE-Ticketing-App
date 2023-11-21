@@ -94,7 +94,7 @@ struct Event {
 		this->setNoOfZones(noOfZones);
 	}
 
-	Event(const Event& event):nameOfEvent(this->setName(event.nameOfEvent)), eventID(event.eventID) {
+	Event(const Event& event) :nameOfEvent(this->setName(event.nameOfEvent)), eventID(event.eventID) {
 		this->setDate(event.getDate());
 		this->setTime(event.getTime());
 		this->setLocation(event.getLocation());
@@ -228,12 +228,12 @@ struct Row {
 		this->setNoOfSeats(noOfSeats);
 	}
 
-	Row() : noOfSeats(Event::MIN_ROW_SEAT_NO){
+	Row() : noOfSeats(Event::MIN_ROW_SEAT_NO) {
 
 	}
 
 private:
-	char rowLetter[2] = {'A', 'A'};
+	char rowLetter[2] = { 'A', 'A' };
 	int noOfSeats{};
 	Seat* seat{};
 	Row* nextRow{};
@@ -273,5 +273,3 @@ private:
 	const int ticketID;
 	string* attributes{};
 };
-
-//Desktop test
