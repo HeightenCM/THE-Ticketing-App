@@ -12,10 +12,17 @@ struct Zone;
 struct Event;
 
 struct Utility {
-	static char* copyArray(const char* sourceArray) {
+	static char* copyCharArray(const char* sourceArray) {
 		size_t sizeOfSourceArray = strlen(sourceArray) + 1;
 		char* copy = new char[sizeOfSourceArray];
 		strcpy_s(copy, sizeOfSourceArray, sourceArray);
+		return copy;
+	}
+	static string* copyStringArray(string* sourceArray, int size) {
+		string* copy = new string[size];
+		for (int i = 0; i < size; i++) {
+			copy[i] = sourceArray[i];
+		}
 		return copy;
 	}
 	static bool isNumeric(const char source) {
@@ -28,7 +35,7 @@ struct Event {
 	string getName() const {
 		return this->nameOfEvent;
 	}
-	string setName(string nameOfEvent) {
+	string checkName(string nameOfEvent) {
 		if (nameOfEvent.size() < MIN_NAME_SIZE || nameOfEvent.size() > MAX_NAME_SIZE)throw exception("");
 		return nameOfEvent;
 	}
@@ -82,19 +89,19 @@ struct Event {
 		if (noOfZones<MIN_ZONE_NO || noOfZones>MAX_ZONE_NO)throw exception("");
 	}
 
-	Event(string nameOfEvent, string locationOfEvent, string dateOfEvent, string openingTime, int noOfZones, int eventID) :nameOfEvent(this->setName(nameOfEvent)), eventID(eventID) {
+	Event(string nameOfEvent, string locationOfEvent, string dateOfEvent, string openingTime, int noOfZones, int eventID) :nameOfEvent(this->checkName(nameOfEvent)), eventID(eventID) {
 		this->setLocation(locationOfEvent);
 		this->setDate(dateOfEvent);
 		this->setTime(openingTime);
 		this->setNoOfZones(noOfZones);
 	}
 
-	Event(string nameOfEvent, string locationOfEvent, int noOfZones, int eventID) : nameOfEvent(this->setName(nameOfEvent)), eventID(eventID) {
+	Event(string nameOfEvent, string locationOfEvent, int noOfZones, int eventID) : nameOfEvent(this->checkName(nameOfEvent)), eventID(eventID) {
 		this->setLocation(locationOfEvent);
 		this->setNoOfZones(noOfZones);
 	}
 
-	Event(const Event& event) :nameOfEvent(this->setName(event.nameOfEvent)), eventID(event.eventID) {
+	Event(const Event& event) :nameOfEvent(this->checkName(event.nameOfEvent)), eventID(event.eventID) {
 		this->setDate(event.getDate());
 		this->setTime(event.getTime());
 		this->setLocation(event.getLocation());
@@ -167,8 +174,8 @@ struct Zone {
 		this->setNoOfRows(noOfRows);
 	}
 
-	Zone(string nameOfZone) : priceOfZone(Event::MIN_ZONE_PRICE), noOfRows(Event::MIN_ROW_SEAT_NO) {
-		this->setNameOfZone(nameOfZone);
+	Zone() : priceOfZone(Event::MIN_ZONE_PRICE), noOfRows(Event::MIN_ROW_SEAT_NO) {
+
 	}
 
 	Zone(Zone& zone) {
@@ -232,6 +239,11 @@ struct Row {
 
 	}
 
+	Row(Row& row) {
+		this->setNoOfSeats(row.getNoOfSeats());
+		/*this->seat = new Seat[this->noOfSeats];*/
+	}
+
 private:
 	char rowLetter[2] = { 'A', 'A' };
 	int noOfSeats{};
@@ -242,9 +254,6 @@ private:
 struct Seat {
 	int getSeatNo() const {
 		return this->seatNo;
-	}
-	void setSeatNo(int seatNo) {
-
 	}
 
 	bool getAccesibility() const {
@@ -260,6 +269,14 @@ struct Seat {
 		newSeat->seatNo = this->seatNo + 1;
 	}
 
+	Seat(bool isAccesible) {
+		if(isAccesible)this->setAccesibility();
+	}
+
+	Seat() {
+
+	}
+
 private:
 	int seatNo{};
 	bool isAccesible{};
@@ -268,9 +285,26 @@ private:
 };
 
 struct Ticket {
+	int getTicketID() const {
+		return this->ticketID;
+	}
+
+	string* getAttributes() const {
+		return Utility::copyStringArray(this->attributes, this->noOfAttributes);
+	}
+	void addAttribute(string newAttribute) {
+		this->noOfAttributes++;
+		string* copy = new string[this->noOfAttributes];
+		for (int i = 0; i < this->noOfAttributes - 2; i++) {
+			copy[i] = this->attributes[i];
+		}
+		copy[this->noOfAttributes - 1] = newAttribute;
+		delete[] this->attributes;
+		this->attributes = copy;
+	}
 
 private:
 	const int ticketID;
 	string* attributes{};
+	int noOfAttributes{};
 };
-//desktop test
