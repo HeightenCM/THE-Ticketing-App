@@ -28,25 +28,23 @@ struct Event {
 	string getName() const {
 		return this->nameOfEvent;
 	}
-	bool setName(string nameOfEvent) {
-		if (nameOfEvent.size() < MIN_NAME_LOCATION_SIZE || nameOfEvent.size() > MAX_NAME_LOCATION_SIZE) return false;
-		this->nameOfEvent = nameOfEvent;
-		return true;
+	string setName(string nameOfEvent) {
+		if (nameOfEvent.size() < MIN_NAME_SIZE || nameOfEvent.size() > MAX_NAME_SIZE)throw exception("");
+		return nameOfEvent;
 	}
 
 	string getLocation() const {
 		return this->locationOfEvent;
 	}
-	bool setLocation(string locationOfEvent) {
-		if (locationOfEvent.size() < MIN_NAME_LOCATION_SIZE || locationOfEvent.size() > MAX_NAME_LOCATION_SIZE) return false;
+	void setLocation(string locationOfEvent) {
+		if (locationOfEvent.size() < MIN_NAME_SIZE || locationOfEvent.size() > MAX_NAME_SIZE) throw exception("");
 		this->locationOfEvent = locationOfEvent;
-		return true;
 	}
 
 	string getDate() const {
 		return this->dateOfEvent;
 	}
-	bool setDate(string dateOfEvent) {
+	void setDate(string dateOfEvent) {
 		if (dateOfEvent.size() == 10) {
 			if (dateOfEvent[4] == '/' || dateOfEvent[7] == '/') {
 				if (Utility::isNumeric(dateOfEvent[0]) && Utility::isNumeric(dateOfEvent[1]) && Utility::isNumeric(dateOfEvent[2]) && Utility::isNumeric(dateOfEvent[3])) {
@@ -54,70 +52,109 @@ struct Event {
 						if (Utility::isNumeric(dateOfEvent[8]) && Utility::isNumeric(dateOfEvent[9])) {
 							this->dateOfEvent = dateOfEvent;
 						}
-						else cout << "\nInvalid format! Day specifier is wrong!\n";
 					}
-					else cout << "\nInvalid format! Month specifier is wrong!\n";
 				}
-				else cout << "\nInvalid format! Year specifier is wrong!\n";
 			}
-			else cout << "\nInvalid format! You forgot the slashes!";
 		}
-		else cout << "\nInvalid or misspelled date format! Size doesn't match format type!\n";
-		return false;
+		throw exception("");
 	}
 
 	string getTime() const {
 		return this->openingTime;
 	}
-	bool setTime(string openingTime) {
+	void setTime(string openingTime) {
 		if (openingTime.length() == 5) {
 			if (openingTime[2] == ':') {
 				if (Utility::isNumeric(openingTime[0]) && Utility::isNumeric(openingTime[1])) {
 					if (Utility::isNumeric(openingTime[3]) && Utility::isNumeric(openingTime[4])) {
 						this->openingTime = openingTime;
 					}
-					else cout << "\nInvalid format! Minute specifier isn't numeric!\n";
 				}
-				else cout << "\nInvalid format! Hour specifier isn't numeric!\n";
 			}
-			else cout << "\nInvalid time format! Missing the : !\n";
 		}
-		else cout << "\nInvalid time format! Size doesn't match format type!\n";
-		return false;
+		throw exception("");
 	}
 
 	int getNoOfZones() const {
 		return this->noOfZones;
 	}
+	void setNoOfZones(int noOfZones) {
+		if (noOfZones<MIN_ZONE_NO || noOfZones>MAX_ZONE_NO)throw exception("");
+	}
+
+	Event(string nameOfEvent, string locationOfEvent, string dateOfEvent, string openingTime, int noOfZones, int eventID) :nameOfEvent(this->setName(nameOfEvent)), eventID(eventID) {
+		this->setLocation(locationOfEvent);
+		this->setDate(dateOfEvent);
+		this->setTime(openingTime);
+		this->setNoOfZones(noOfZones);
+	}
+
+	Event(string nameOfEvent, string locationOfEvent, int noOfZones, int eventID) : nameOfEvent(this->setName(nameOfEvent)), eventID(eventID) {
+		this->setLocation(locationOfEvent);
+		this->setNoOfZones(noOfZones);
+	}
+
+	Event(const Event& event):nameOfEvent(this->setName(event.nameOfEvent)), eventID(event.eventID) {
+		this->setDate(event.getDate());
+		this->setTime(event.getTime());
+		this->setLocation(event.getLocation());
+		this->setNoOfZones(event.getNoOfZones());
+		/*this->zone = new Zone[this->noOfZones];*/
+	}
+
+	/*~Event() {
+		delete zone;
+	}*/
+
+	void operator=(const Event& event) {
+		this->setDate(event.getDate());
+		this->setTime(event.getTime());
+		this->setLocation(event.getLocation());
+		this->setNoOfZones(event.getNoOfZones());
+		/*this->zone = new Zone[this->noOfZones];*/
+	}
+
+
+
+	static const int MIN_NAME_SIZE{ 3 };
+	static const int MAX_NAME_SIZE{ 50 };
+	static const int MIN_ZONE_NO{ 1 };
+	static const int MAX_ZONE_NO{ 10 };
+	static const int MIN_ZONE_PRICE{ 5 };
+	static const int MIN_ROW_SEAT_NO{ 1 };
+	static const int MAX_ROW_SEAT_NO{ 50 };
 
 private:
-	string nameOfEvent{}, locationOfEvent{}, dateOfEvent{}, openingTime{};
+	const string nameOfEvent;
+	string locationOfEvent{}, dateOfEvent{}, openingTime{};
 	const int eventID;
 	int noOfZones{};
 	Zone* zone{};
-
-	static const int MIN_NAME_LOCATION_SIZE{ 3 };
-	static const int MAX_NAME_LOCATION_SIZE{ 50 };
-	static const int MAX_ZONE_NO{ 10 };
-	static const int MIN_ZONE_NO{ 1 };
 };
 
 struct Zone {
 	string getNameOfZone() const {
 		return this->nameOfZone;
 	}
-	bool setNameOfZone(string nameOfZone) {
-		if (nameOfZone.size() < MIN_NAME_SIZE)return false;
+	void setNameOfZone(string nameOfZone) {
+		if (nameOfZone.size() < Event::MIN_NAME_SIZE || nameOfZone.size() > Event::MAX_NAME_SIZE)throw exception("");
 		this->nameOfZone = nameOfZone;
-		return true;
 	}
 
 	int getNoOfRows() const {
 		return this->noOfRows;
 	}
 	bool setNoOfRows(int noOfRows) {
-		if (noOfRows < MIN_ROW_NO || noOfRows > MAX_ROW_NO)return false;
+		if (noOfRows < Event::MIN_ROW_SEAT_NO || noOfRows > Event::MAX_ROW_SEAT_NO)return false;
 		this->noOfRows = noOfRows;
+	}
+
+	float getPriceOfZone() const {
+		return this->priceOfZone;
+	}
+	void setPriceOfZone(float priceOfZone) {
+		if (priceOfZone < Event::MIN_ZONE_PRICE)throw exception("");
+		this->priceOfZone = priceOfZone;
 	}
 
 	void addNewZone(Zone* newZone) {
@@ -125,15 +162,37 @@ struct Zone {
 		this->nextZone = newZone;
 	}
 
+	Zone(string nameOfZone, float priceOfZone, int noOfRows) {
+		this->setNameOfZone(nameOfZone);
+		this->setNoOfRows(noOfRows);
+	}
+
+	Zone(string nameOfZone) : priceOfZone(Event::MIN_ZONE_PRICE), noOfRows(Event::MIN_ROW_SEAT_NO) {
+		this->setNameOfZone(nameOfZone);
+	}
+
+	Zone(Zone& zone) {
+		this->setNameOfZone(zone.getNameOfZone());
+		this->setPriceOfZone(zone.getPriceOfZone());
+		this->setNoOfRows(zone.getNoOfRows());
+		/*zone.addNewZone(this);*/
+		/*Row* rowList = new Row[this->noOfRows];*/
+	}
+
+	void operator=(Zone& zone) {
+		this->setNameOfZone(zone.getNameOfZone());
+		this->setPriceOfZone(zone.getPriceOfZone());
+		this->setNoOfRows(zone.getNoOfRows());
+		/*zone.addNewZone(this);*/
+		/*Row* rowList = new Row[this->noOfRows];*/
+	}
+
 private:
 	string nameOfZone{};
+	float priceOfZone{};
 	int noOfRows{};
 	Row* row{};
 	Zone* nextZone{};
-
-	static const int MIN_NAME_SIZE{ 3 };
-	static const int MIN_ROW_NO{ 1 };
-	static const int MAX_ROW_NO{ 50 };
 };
 
 struct Row {
@@ -145,8 +204,8 @@ struct Row {
 	int getNoOfSeats() const {
 		return this->noOfSeats;
 	}
-	bool setNoOfRows(int noOfSeats) {
-		if (noOfSeats < MIN_SEAT_NO || noOfSeats > MAX_SEAT_NO)return false;
+	void setNoOfSeats(int noOfSeats) {
+		if (noOfSeats < Event::MIN_ROW_SEAT_NO || noOfSeats > Event::MAX_ROW_SEAT_NO)throw exception("");
 		this->noOfSeats = noOfSeats;
 	}
 
@@ -165,20 +224,27 @@ struct Row {
 		}
 	}
 
+	Row(int noOfSeats) {
+		this->setNoOfSeats(noOfSeats);
+	}
+
+	Row() : noOfSeats(Event::MIN_ROW_SEAT_NO){
+
+	}
+
 private:
 	char rowLetter[2] = {'A', 'A'};
 	int noOfSeats{};
 	Seat* seat{};
 	Row* nextRow{};
-
-	static const int NO_OF_LETTERS{ 2 };
-	static const int MAX_SEAT_NO{ 50 };
-	static const int MIN_SEAT_NO{ 1 };
 };
 
 struct Seat {
 	int getSeatNo() const {
 		return this->seatNo;
+	}
+	void setSeatNo(int seatNo) {
+
 	}
 
 	bool getAccesibility() const {
