@@ -54,7 +54,7 @@ struct Event {
 		return this->nameOfEvent;
 	}
 	string checkName(string nameOfEvent) {
-		if (nameOfEvent.size() < MIN_NAME_SIZE || nameOfEvent.size() > MAX_NAME_SIZE) throw exception("");
+		if (nameOfEvent.size() < MIN_NAME_SIZE || nameOfEvent.size() > MAX_NAME_SIZE) throw exception("Name size out of boundaries!");
 		return nameOfEvent;
 	}
 
@@ -62,7 +62,7 @@ struct Event {
 		return this->locationOfEvent;
 	}
 	void setLocation(string locationOfEvent) {
-		if (locationOfEvent.size() < MIN_NAME_SIZE || locationOfEvent.size() > MAX_NAME_SIZE) throw exception("");
+		if (locationOfEvent.size() < MIN_NAME_SIZE || locationOfEvent.size() > MAX_NAME_SIZE) throw exception("Location size out of boundaries!");
 		this->locationOfEvent = locationOfEvent;
 	}
 
@@ -76,12 +76,13 @@ struct Event {
 					if (Utility::isNumeric(dateOfEvent[5]) && Utility::isNumeric(dateOfEvent[6])) {
 						if (Utility::isNumeric(dateOfEvent[8]) && Utility::isNumeric(dateOfEvent[9])) {
 							this->dateOfEvent = dateOfEvent;
+							return;
 						}
 					}
 				}
 			}
 		}
-		throw exception("");
+		throw exception("Date is of invalid format!");
 	}
 
 	string getTime() const {
@@ -93,18 +94,19 @@ struct Event {
 				if (Utility::isNumeric(openingTime[0]) && Utility::isNumeric(openingTime[1])) {
 					if (Utility::isNumeric(openingTime[3]) && Utility::isNumeric(openingTime[4])) {
 						this->openingTime = openingTime;
+						return;
 					}
 				}
 			}
 		}
-		throw exception("");
+		throw exception("Time is of invalid format!");
 	}
 
 	int getNoOfZones() const {
 		return this->noOfZones;
 	}
 	void setNoOfZones(int noOfZones) {
-		if (noOfZones<MIN_ZONE_NO || noOfZones>MAX_ZONE_NO)throw exception("");
+		if (noOfZones<MIN_ZONE_NO || noOfZones>MAX_ZONE_NO)throw exception("Number of zones outside of boundaries!");
 	}
 
 	int getNoOfSponsors() const {
@@ -112,7 +114,7 @@ struct Event {
 	}
 	
 	void addSponsor(string newSponsor) {
-		if (this->noOfSponsors >= MAX_SPONSORS)throw exception("");
+		if (this->noOfSponsors >= MAX_SPONSORS)throw exception("Too many sponsors!");
 		this->sponsors[this->noOfSponsors++] = newSponsor;
 	}
 
@@ -120,7 +122,7 @@ struct Event {
 		this->setLocation(locationOfEvent);
 		this->setDate(dateOfEvent);
 		this->setTime(openingTime);
-		if (noOfSponsors > MAX_SPONSORS)throw exception("");
+		if (noOfSponsors > MAX_SPONSORS)throw exception("Too many sponsors!");
 		for (int i = 0; i < noOfSponsors; i++) {
 			this->sponsors[i] = sponsors[i];
 		}
@@ -181,7 +183,7 @@ struct Zone {
 		return this->nameOfZone;
 	}
 	void setNameOfZone(string nameOfZone) {
-		if (nameOfZone.size() < Event::MIN_NAME_SIZE || nameOfZone.size() > Event::MAX_NAME_SIZE)throw exception("");
+		if (nameOfZone.size() < Event::MIN_NAME_SIZE || nameOfZone.size() > Event::MAX_NAME_SIZE)throw exception("Name outside of boundaries!");
 		this->nameOfZone = nameOfZone;
 	}
 
@@ -197,7 +199,7 @@ struct Zone {
 		return this->priceOfZone;
 	}
 	void setPriceOfZone(float priceOfZone) {
-		if (priceOfZone < Event::MIN_ZONE_PRICE)throw exception("");
+		if (priceOfZone < Event::MIN_ZONE_PRICE)throw exception("Price too low!");
 		this->priceOfZone = priceOfZone;
 	}
 
@@ -260,7 +262,7 @@ struct Row {
 		return this->noOfSeats;
 	}
 	void setNoOfSeats(int noOfSeats) {
-		if (noOfSeats < Event::MIN_ROW_SEAT_NO || noOfSeats > Event::MAX_ROW_SEAT_NO)throw exception("");
+		if (noOfSeats < Event::MIN_ROW_SEAT_NO || noOfSeats > Event::MAX_ROW_SEAT_NO)throw exception("Too many or not enough seats!");
 		this->noOfSeats = noOfSeats;
 	}
 
@@ -322,30 +324,94 @@ struct Seat {
 	}
 
 	void addColor(string newColor) {
-		if (this->noOfColors >= Event::MAX_COLORS)throw exception("");
+		if (this->noOfColors >= Event::MAX_COLORS)throw exception("Too many colors!");
 		this->colors[this->noOfColors++] = newColor;
 	}
 
-	Seat(AccesibilityGrade grade, string* colors,int noOfColors) {
+	Seat(AccesibilityGrade grade, string* colors, int noOfColors) {
 		this->setAccesibility(grade);
-		if (noOfColors > Event::MAX_COLORS)throw exception("");
+		if (noOfColors > Event::MAX_COLORS)throw exception("Too many colors!");
 		for (int i = 0; i < noOfColors; i++) {
 			this->colors[i] = colors[i];
 		}
 	}
 
-	Seat() {
+	Seat(string* colors, int noOfColors) {
+		if (noOfColors > Event::MAX_COLORS)throw exception("Too many colors!");
+		for (int i = 0; i < noOfColors; i++) {
+			this->colors[i] = colors[i];
+		}
+	}
 
+	Seat(Seat& seat) {
+		this->setAccesibility(seat.accesible);
+		this->seatNo = seat.seatNo + 1;
+		this->noOfColors = seat.noOfColors;
+		for (int i = 0; i < seat.noOfColors; i++) {
+			this->colors[i] = seat.colors[i];
+		}
 	}
 
 	~Seat() {
 		if(this->ticket!=nullptr)delete[] this->ticket;
 	}
 
+	Seat operator=(Seat& seat) {
+		this->setAccesibility(seat.accesible);
+		this->seatNo = seat.seatNo + 1;
+		this->noOfColors = seat.noOfColors;
+		for (int i = 0; i < seat.noOfColors; i++) {
+			this->colors[i] = seat.colors[i];
+		}
+	}
+
+	string& operator[](int index) {
+		if (index < 0 || index >= noOfColors)throw exception("Invalid color index!");
+		return this->colors[index];
+	}
+
+	Seat operator+(Seat& ticket) {
+		Seat newSeat(*this);
+		for (int i = 0; i < ticket.noOfColors; i++) {
+			newSeat.addColor(ticket.colors[i]);
+		}
+		return newSeat;
+	}
+
+	Seat operator++() {
+		string newColor;
+		cout << "\nNew color is: ";
+		cin >> newColor;
+		this->addColor(newColor);
+	}
+
+	void operator!() {
+		this->setAccesibility(AccesibilityGrade::NONE);
+	}
+
+	operator int() const {
+		return this->seatNo;
+	}
+
+	bool operator>(Seat& seat) {
+		if (this->noOfColors > seat.noOfColors)return true;
+		return false;
+	}
+
+	bool operator==(Seat& seat) {
+		if (this->noOfColors == seat.noOfColors) {
+			for (int i = 0; i < this->noOfColors; i++) {
+				if (this->colors[i] != seat.colors[i])return false;
+			}
+		}
+		else return false;
+		return true;
+	}
+
 private:
 	int seatNo{};
 	AccesibilityGrade accesible{};
-	string colors[Event::MAX_COLORS];
+	string colors[Event::MAX_COLORS] = {};
 	int noOfColors{};
 	Ticket* ticket{};
 	Seat* nextSeat{};
@@ -443,6 +509,7 @@ struct Ticket {
 				if (this->attributes[i] != ticket.attributes[i])return false;
 			}
 		}
+		else return false;
 		return true;
 	}
 
