@@ -213,17 +213,23 @@ struct Zone {
 	}
 
 	void addFeature(string newFeature) {
-		if (this->noOfFeatures >= Event::MAX_ZONE_FEATURE)throw exception("");
+		if (this->noOfFeatures >= Event::MAX_ZONE_FEATURE)throw exception("Too many features!");
 		this->features[this->noOfFeatures++] = newFeature;
 	}
 
-	Zone(string nameOfZone, float priceOfZone, int noOfRows) {
+	Zone(string nameOfZone, float priceOfZone, int noOfRows, string* features, int noOfFeatures) {
 		this->setNameOfZone(nameOfZone);
 		this->setNoOfRows(noOfRows);
+		this->setPriceOfZone(priceOfZone);
+		this->noOfFeatures = noOfFeatures;
+		if (noOfFeatures >= Event::MAX_ZONE_FEATURE)throw exception("Too many features!");
+		for (int i = 0; i < noOfFeatures; i++) {
+			this->features[i] = features[i];
+		}
 	}
 
-	Zone() : priceOfZone(Event::MIN_ZONE_PRICE), noOfRows(Event::MIN_ROW_SEAT_NO) {
-
+	Zone(string nameOfZone) : priceOfZone(Event::MIN_ZONE_PRICE), noOfRows(Event::MIN_ROW_SEAT_NO) {
+		this->setNameOfZone(nameOfZone);
 	}
 
 	Zone(Zone& zone) {
@@ -234,12 +240,59 @@ struct Zone {
 		/*Row* rowList = new Row[this->noOfRows];*/
 	}
 
-	void operator=(Zone& zone) {
+	~Zone() {
+		if (this->row != nullptr)delete this->row;
+	}
+
+	Zone& operator=(Zone& zone) {
 		this->setNameOfZone(zone.getNameOfZone());
 		this->setPriceOfZone(zone.getPriceOfZone());
 		this->setNoOfRows(zone.getNoOfRows());
 		/*zone.addNewZone(this);*/
 		/*Row* rowList = new Row[this->noOfRows];*/
+	}
+
+	string& operator[](int index) {
+		if (index<0 || index>this->noOfFeatures)throw exception("Features index out of boundaries!");
+		return this->features[index];
+	}
+
+	Zone operator+(Zone& zone) {
+		Zone newZone(*this);
+		for (int i = 0; i < zone.noOfFeatures; i++) {
+			newZone.addFeature(zone.features[i]);
+		}
+		return newZone;
+	}
+
+	Zone operator++() {
+		string newFeature;
+		cout << "\nNew feature is: ";
+		cin >> newFeature;
+		this->addFeature(newFeature);
+	}
+
+	void operator!() {
+		this->priceOfZone = Event::MIN_ZONE_PRICE;
+	}
+
+	operator string() const {
+		return this->getNameOfZone();
+	}
+
+	bool operator>(Zone& zone) {
+		if (this->noOfFeatures > zone.noOfFeatures)return true;
+		return false;
+	}
+
+	bool operator==(Zone& zone) {
+		if (this->noOfFeatures == zone.noOfFeatures) {
+			for (int i = 0; i < this->noOfFeatures; i++) {
+				if (this->features[i] != zone.features[i])return false;
+			}
+		}
+		else return false;
+		return true;
 	}
 
 private:
@@ -291,7 +344,34 @@ struct Row {
 
 	Row(Row& row) {
 		this->setNoOfSeats(row.getNoOfSeats());
-		/*this->seat = new Seat[this->noOfSeats];*/
+	}
+
+	~Row() {
+		if (this->seat != nullptr)delete this->seat;
+	}
+
+	Row& operator=(Row& row) {
+		this->setNoOfSeats(row.noOfSeats);
+	}
+
+	char& operator[](int index) {
+		if (index < 0 || index>1)throw exception("Invalid row letter index!");
+		return this->rowLetter[index];
+	}
+
+	bool operator>(Row& row) {
+		if (this->rowLetter[0] > row.rowLetter[0])return true;
+		if (this->rowLetter[0] == row.rowLetter[0]) {
+			if (this->rowLetter[1] > row.rowLetter[1])return true;
+		}
+		return false;
+	}
+
+	bool operator==(Row& row) {
+		for (int i = 0; i < 2; i++) {
+			if (this->rowLetter[i] != row.rowLetter[i])return false;
+		}
+		return true;
 	}
 
 private:
@@ -353,16 +433,17 @@ struct Seat {
 	}
 
 	~Seat() {
-		if(this->ticket!=nullptr)delete[] this->ticket;
+		if(this->ticket!=nullptr)delete this->ticket;
 	}
 
-	Seat operator=(Seat& seat) {
+	Seat& operator=(Seat& seat) {
 		this->setAccesibility(seat.accesible);
 		this->seatNo = seat.seatNo + 1;
 		this->noOfColors = seat.noOfColors;
 		for (int i = 0; i < seat.noOfColors; i++) {
 			this->colors[i] = seat.colors[i];
 		}
+		return *this;
 	}
 
 	string& operator[](int index) {
@@ -461,7 +542,7 @@ struct Ticket {
 		if(this->attributes!=nullptr)delete[] this->attributes;
 	}
 
-	void operator=(Ticket& ticket) {
+	Ticket& operator=(Ticket& ticket) {
 		this->noOfAttributes = ticket.noOfAttributes;
 		if (ticket.noOfAttributes != 0) {
 			string* attributes = new string[ticket.noOfAttributes];
@@ -470,6 +551,7 @@ struct Ticket {
 			}
 		}
 		this->attributes = attributes;
+		return *this;
 	}
 
 	string& operator[](int index) {
