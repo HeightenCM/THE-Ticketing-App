@@ -5,6 +5,8 @@
 
 using namespace std;
 
+enum class AccesibilityGrade { NONE = 0, MINOR_DISABILITIES = 1, MAJOR_DISABILITIES = 2 };
+
 struct Ticket;
 struct Seat;
 struct Row;
@@ -29,6 +31,22 @@ struct Utility {
 		if (source < '0' || source>'9')return false;
 		return true;
 	}
+	static string AccesibilityToString(AccesibilityGrade accesible) {
+		switch (accesible) {
+		case AccesibilityGrade::NONE:
+			return "Seat isn't destined for people with disabilities.";
+			break;
+		case AccesibilityGrade::MINOR_DISABILITIES:
+			return "Seat is destined for people with minor disabilities.";
+			break;
+		case AccesibilityGrade::MAJOR_DISABILITIES:
+			return "Seat is destined for people with major disabilities.";
+			break;
+		default:
+			throw exception("Type not covered");
+		}
+
+	}
 };
 
 struct Event {
@@ -36,7 +54,7 @@ struct Event {
 		return this->nameOfEvent;
 	}
 	string checkName(string nameOfEvent) {
-		if (nameOfEvent.size() < MIN_NAME_SIZE || nameOfEvent.size() > MAX_NAME_SIZE)throw exception("");
+		if (nameOfEvent.size() < MIN_NAME_SIZE || nameOfEvent.size() > MAX_NAME_SIZE) throw exception("");
 		return nameOfEvent;
 	}
 
@@ -89,22 +107,38 @@ struct Event {
 		if (noOfZones<MIN_ZONE_NO || noOfZones>MAX_ZONE_NO)throw exception("");
 	}
 
-	Event(string nameOfEvent, string locationOfEvent, string dateOfEvent, string openingTime, int noOfZones, int eventID) :nameOfEvent(this->checkName(nameOfEvent)), eventID(eventID) {
+	int getNoOfSponsors() const {
+		return this->noOfSponsors;
+	}
+	
+	void addSponsor(string newSponsor) {
+		if (this->noOfSponsors >= MAX_SPONSORS)throw exception("");
+		this->sponsors[this->noOfSponsors++] = newSponsor;
+	}
+
+	Event(string nameOfEvent, string locationOfEvent, string dateOfEvent, string openingTime, string* sponsors, int noOfSponsors, int noOfZones) :nameOfEvent(this->checkName(nameOfEvent)) {
 		this->setLocation(locationOfEvent);
 		this->setDate(dateOfEvent);
 		this->setTime(openingTime);
+		if (noOfSponsors > MAX_SPONSORS)throw exception("");
+		for (int i = 0; i < noOfSponsors; i++) {
+			this->sponsors[i] = sponsors[i];
+		}
 		this->setNoOfZones(noOfZones);
 	}
 
-	Event(string nameOfEvent, string locationOfEvent, int noOfZones, int eventID) : nameOfEvent(this->checkName(nameOfEvent)), eventID(eventID) {
-		this->setLocation(locationOfEvent);
+	Event(string nameOfEvent, int noOfZones) : nameOfEvent(this->checkName(nameOfEvent)) {
 		this->setNoOfZones(noOfZones);
 	}
 
-	Event(const Event& event) :nameOfEvent(this->checkName(event.nameOfEvent)), eventID(event.eventID) {
+	Event(const Event& event) :nameOfEvent(this->checkName(event.nameOfEvent)) {
 		this->setDate(event.getDate());
 		this->setTime(event.getTime());
 		this->setLocation(event.getLocation());
+		this->noOfSponsors = event.getNoOfSponsors();
+		for (int i = 0; i < event.getNoOfSponsors(); i++) {
+			this->sponsors[i] = event.sponsors[i];
+		}
 		this->setNoOfZones(event.getNoOfZones());
 		/*this->zone = new Zone[this->noOfZones];*/
 	}
@@ -122,7 +156,6 @@ struct Event {
 	}
 
 
-
 	static const int MIN_NAME_SIZE{ 3 };
 	static const int MAX_NAME_SIZE{ 50 };
 	static const int MIN_ZONE_NO{ 1 };
@@ -130,12 +163,16 @@ struct Event {
 	static const int MIN_ZONE_PRICE{ 5 };
 	static const int MIN_ROW_SEAT_NO{ 1 };
 	static const int MAX_ROW_SEAT_NO{ 50 };
+	static const int MAX_SPONSORS{ 5 };
+	static const int MAX_ZONE_FEATURE{ 3 };
+	static const int MAX_COLORS{ 3 };
 
 private:
 	const string nameOfEvent;
 	string locationOfEvent{}, dateOfEvent{}, openingTime{};
-	const int eventID;
 	int noOfZones{};
+	string sponsors[MAX_SPONSORS] = {};
+	int noOfSponsors{};
 	Zone* zone{};
 };
 
@@ -169,6 +206,15 @@ struct Zone {
 		this->nextZone = newZone;
 	}
 
+	int getNoOfFeatures() const {
+		return this->noOfFeatures;
+	}
+
+	void addFeature(string newFeature) {
+		if (this->noOfFeatures >= Event::MAX_ZONE_FEATURE)throw exception("");
+		this->features[this->noOfFeatures++] = newFeature;
+	}
+
 	Zone(string nameOfZone, float priceOfZone, int noOfRows) {
 		this->setNameOfZone(nameOfZone);
 		this->setNoOfRows(noOfRows);
@@ -198,14 +244,16 @@ private:
 	string nameOfZone{};
 	float priceOfZone{};
 	int noOfRows{};
+	string features[Event::MAX_ZONE_FEATURE];
+	int noOfFeatures{};
 	Row* row{};
 	Zone* nextZone{};
 };
 
 struct Row {
 	string getRowLetters() const {
-		string rowLetter = to_string(this->rowLetter[0]) + to_string(this->rowLetter[1]);
-		return rowLetter;
+		string rowLetters = string(1, this->rowLetter[0]) + string(1, this->rowLetter[1]);
+		return rowLetters;
 	}
 
 	int getNoOfSeats() const {
@@ -256,11 +304,11 @@ struct Seat {
 		return this->seatNo;
 	}
 
-	bool getAccesibility() const {
-		return this->isAccesible;
+	string getAccesibility() const {
+		return Utility::AccesibilityToString(this->accesible);
 	}
-	bool setAccesibility() {
-		this->isAccesible = true;
+	void setAccesibility(AccesibilityGrade grade) {
+		this->accesible = grade;
 	}
 
 	void addNewSeat(Seat* newSeat) {
@@ -269,17 +317,36 @@ struct Seat {
 		newSeat->seatNo = this->seatNo + 1;
 	}
 
-	Seat(bool isAccesible) {
-		if(isAccesible)this->setAccesibility();
+	int getNoOfColors() const {
+		return this->noOfColors;
+	}
+
+	void addColor(string newColor) {
+		if (this->noOfColors >= Event::MAX_COLORS)throw exception("");
+		this->colors[this->noOfColors++] = newColor;
+	}
+
+	Seat(AccesibilityGrade grade, string* colors,int noOfColors) {
+		this->setAccesibility(grade);
+		if (noOfColors > Event::MAX_COLORS)throw exception("");
+		for (int i = 0; i < noOfColors; i++) {
+			this->colors[i] = colors[i];
+		}
 	}
 
 	Seat() {
 
 	}
 
+	~Seat() {
+		if(this->ticket!=nullptr)delete[] this->ticket;
+	}
+
 private:
 	int seatNo{};
-	bool isAccesible{};
+	AccesibilityGrade accesible{};
+	string colors[Event::MAX_COLORS];
+	int noOfColors{};
 	Ticket* ticket{};
 	Seat* nextSeat{};
 };
@@ -303,8 +370,88 @@ struct Ticket {
 		this->attributes = copy;
 	}
 
+	Ticket(string* attributes, int noOfAttributes) :ticketID(Ticket::id_no--) {
+		for (int i = 0; i < noOfAttributes; i++) {
+			this->addAttribute(attributes[i]);
+		}
+	}
+
+	Ticket() :ticketID(Ticket::id_no--) {
+
+	}
+
+	Ticket(Ticket& ticket) : ticketID(Ticket::id_no--) {
+		this->noOfAttributes = ticket.noOfAttributes;
+		if (ticket.noOfAttributes != 0) {
+			string* attributes = new string[ticket.noOfAttributes];
+			for (int i = 0; i < ticket.noOfAttributes; i++) {
+				attributes[i] = ticket.attributes[i];
+			}
+		}
+		this->attributes = attributes;
+	}
+
+	~Ticket() {
+		if(this->attributes!=nullptr)delete[] this->attributes;
+	}
+
+	void operator=(Ticket& ticket) {
+		this->noOfAttributes = ticket.noOfAttributes;
+		if (ticket.noOfAttributes != 0) {
+			string* attributes = new string[ticket.noOfAttributes];
+			for (int i = 0; i < ticket.noOfAttributes; i++) {
+				attributes[i] = ticket.attributes[i];
+			}
+		}
+		this->attributes = attributes;
+	}
+
+	string& operator[](int index) {
+		if (index < 0 || index >= this->noOfAttributes) {
+			throw exception("");
+		}
+		return this->attributes[index];
+	}
+
+	Ticket operator+(Ticket& ticket) {
+		Ticket newTicket(*this);
+		for (int i = 0; i < ticket.noOfAttributes; i++) {
+			newTicket.addAttribute(ticket.attributes[i]);
+		}
+		return newTicket;
+	}
+
+	Ticket operator++() {
+		string newAttribute;
+		cout << "\nNew attribute is: ";
+		cin >> newAttribute;
+		this->addAttribute(newAttribute);
+	}
+
+	operator int() const {
+		return this->ticketID;
+	}
+
+	bool operator>(Ticket& ticket) {
+		if (this->noOfAttributes > ticket.noOfAttributes)return true;
+		return false;
+	}
+
+	bool operator==(Ticket& ticket) {
+		if (this->noOfAttributes == ticket.noOfAttributes) {
+			for (int i = 0; i < this->noOfAttributes; i++) {
+				if (this->attributes[i] != ticket.attributes[i])return false;
+			}
+		}
+		return true;
+	}
+
 private:
 	const int ticketID;
 	string* attributes{};
 	int noOfAttributes{};
+	
+	static int id_no;
 };
+
+int Ticket::id_no = UINT64_MAX;
