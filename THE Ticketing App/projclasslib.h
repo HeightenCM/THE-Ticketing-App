@@ -145,18 +145,63 @@ struct Event {
 		/*this->zone = new Zone[this->noOfZones];*/
 	}
 
-	/*~Event() {
-		delete zone;
-	}*/
+	~Event() {
+		if(this->zone!=nullptr)delete zone;
+	}
 
-	void operator=(const Event& event) {
+	Event& operator=(Event& event) {
 		this->setDate(event.getDate());
 		this->setTime(event.getTime());
 		this->setLocation(event.getLocation());
 		this->setNoOfZones(event.getNoOfZones());
 		/*this->zone = new Zone[this->noOfZones];*/
+		return *this;
 	}
 
+	string& operator[](int index) {
+		if (index<0 || index>this->noOfSponsors)throw exception("Sponsors index out of boundaries!");
+		return this->sponsors[index];
+	}
+
+	Event operator+(Event& event) {
+		Event newEvent(*this);
+		for (int i = 0; i < event.noOfSponsors; i++) {
+			newEvent.addSponsor(event.sponsors[i]);
+		}
+		return newEvent;
+	}
+
+	Event operator++() {
+		string newSponsor;
+		cout << "\nNew sponsor is: ";
+		cin >> newSponsor;
+		this->addSponsor(newSponsor);
+	}
+
+	void operator!() {
+		for (int i = 0; i < this->noOfSponsors; i++) {
+			this->sponsors[i] = "";
+		}
+	}
+
+	operator string() const {
+		return this->getName();
+	}
+
+	bool operator>(Event& event) {
+		if (this->noOfSponsors > event.noOfSponsors)return true;
+		return false;
+	}
+
+	bool operator==(Event& event) {
+		if (this->noOfSponsors == event.noOfSponsors) {
+			for (int i = 0; i < this->noOfSponsors; i++) {
+				if (this->sponsors[i] != event.sponsors[i])return false;
+			}
+		}
+		else return false;
+		return true;
+	}
 
 	static const int MIN_NAME_SIZE{ 3 };
 	static const int MAX_NAME_SIZE{ 50 };
@@ -250,6 +295,7 @@ struct Zone {
 		this->setNoOfRows(zone.getNoOfRows());
 		/*zone.addNewZone(this);*/
 		/*Row* rowList = new Row[this->noOfRows];*/
+		return *this;
 	}
 
 	string& operator[](int index) {
@@ -352,6 +398,7 @@ struct Row {
 
 	Row& operator=(Row& row) {
 		this->setNoOfSeats(row.noOfSeats);
+		return *this;
 	}
 
 	char& operator[](int index) {
