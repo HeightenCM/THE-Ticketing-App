@@ -224,6 +224,19 @@ struct Seat {
 		return Utility::copyStringArray(this->colors, this->noOfColors);
 	}
 
+	bool isSold() {
+		if (this->ticket == nullptr)return false;
+		return true;
+	}
+
+	void sellTicket() {
+		this->ticket = new Ticket();
+	}
+
+	Ticket* getTicket() {
+		return this->ticket;
+	}
+
 	Seat(int seatNo, AccesibilityGrade grade, string* colors, int noOfColors) {
 		this->setAccesibility(grade);
 		this->setSeatNumber(seatNo);
@@ -348,6 +361,11 @@ struct Row {
 		this->noOfSeats = noOfSeats;
 	}
 
+	Seat* getSeat(int index) {
+		if (index<0 || index>this->noOfSeats)throw exception("Seat index outside boundaries!");
+		return this->seat[index];
+	}
+
 	Row(int noOfSeats, const char* rowLetters) {
 		this->setNoOfSeats(noOfSeats);
 		this->setRowLetters(rowLetters);
@@ -465,6 +483,11 @@ struct Zone {
 
 	string* getFeatures() {
 		return Utility::copyStringArray(this->features, this->noOfFeatures);
+	}
+
+	Row* getRow(int index) {
+		if (index<0 || index>this->noOfRows)throw exception("Row index outside boundaries!");
+		return this->row[index];
 	}
 
 	Zone(string nameOfZone, float priceOfZone, int noOfRows, string* features, int noOfFeatures) {
@@ -662,6 +685,11 @@ struct Event {
 		this->sponsors[this->noOfSponsors++] = newSponsor;
 	}
 
+	Zone* getZone(int index) {
+		if (index<0 || index>this->noOfZones)throw exception("Zone index outside boundaries!");
+		return this->zone[index];
+	}
+
 	Event(string nameOfEvent, string locationOfEvent, string dateOfEvent, string openingTime, string* sponsors, int noOfSponsors, int noOfZones) :nameOfEvent(this->checkName(nameOfEvent)) {
 		this->setLocation(locationOfEvent);
 		this->setDate(dateOfEvent);
@@ -674,6 +702,7 @@ struct Event {
 		this->zone = new Zone * [noOfZones];
 		string name{};
 		for (int i = 0; i < noOfZones; i++) {
+			cout << "Name of zone " << i << " is ";
 			cin >> name;
 			this->zone[i] = new Zone(name);
 		}
