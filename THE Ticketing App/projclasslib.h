@@ -77,6 +77,9 @@ struct Ticket {
 	string* getAttributes() const {
 		return Utility::copyStringArray(this->attributes, this->noOfAttributes);
 	}
+	int getNumberOfAttributes() const {
+		return this->noOfAttributes;
+	}
 	void addAttribute(string newAttribute) {
 		this->noOfAttributes++;
 		string* copy = new string[this->noOfAttributes];
@@ -176,9 +179,29 @@ private:
 
 int Ticket::id_no = UINT64_MAX;
 
+void operator<<(ostream os, Ticket& ticket) {
+	os << "\nTicket ID is " << ticket.getTicketID();
+	os << "\nTicket attributes are ";
+	string* featureArray = ticket.getAttributes();
+	for (int i = 0; i < ticket.getNumberOfAttributes(); i++) {
+		os << featureArray[i] << " ";
+	}
+}
+
+//istream& operator>>(istream is, Ticket& ticket) {
+//	string newAttribute{};
+//	cout << "\nNew attribute is ";
+//	is >> newAttribute;
+//	ticket.addAttribute(newAttribute);
+//}
+
 struct Seat {
 	int getSeatNo() const {
 		return this->seatNo;
+	}
+	void setSeatNumber(int seatNo) {
+		if (seatNo > Utility::MAX_ROW_SEAT_NO)throw exception("Row number too high!");
+		this->seatNo = seatNo;
 	}
 
 	string getAccesibility() const {
@@ -197,19 +220,29 @@ struct Seat {
 		this->colors[this->noOfColors++] = newColor;
 	}
 
-	Seat(AccesibilityGrade grade, string* colors, int noOfColors) {
+	string* getColors() {
+		return Utility::copyStringArray(this->colors, this->noOfColors);
+	}
+
+	Seat(int seatNo, AccesibilityGrade grade, string* colors, int noOfColors) {
 		this->setAccesibility(grade);
+		this->setSeatNumber(seatNo);
 		if (noOfColors > Utility::MAX_COLORS)throw exception("Too many colors!");
 		for (int i = 0; i < noOfColors; i++) {
 			this->colors[i] = colors[i];
 		}
 	}
 
-	Seat(string* colors, int noOfColors) {
+	Seat(int seatNo, string* colors, int noOfColors) {
 		if (noOfColors > Utility::MAX_COLORS)throw exception("Too many colors!");
 		for (int i = 0; i < noOfColors; i++) {
 			this->colors[i] = colors[i];
 		}
+		this->setSeatNumber(seatNo);
+	}
+
+	Seat(int seatNo) {
+		this->setSeatNumber(seatNo);
 	}
 
 	Seat(Seat& seat) {
@@ -286,10 +319,25 @@ private:
 	Ticket* ticket{};
 };
 
+void operator<<(ostream os, Seat& seat) {
+	os << "\nSeat accesibility state: " << seat.getAccesibility();
+	os << "\nSeat number is " << seat.getSeatNo();
+	os << "\nSeat colors are ";
+	string* colorArray = seat.getColors();
+	for (int i = 0; i < seat.getNoOfColors(); i++) {
+		os << colorArray[i] << " ";
+	}
+}
+
 struct Row {
 	string getRowLetters() const {
 		string rowLetters = string(1, this->rowLetter[0]) + string(1, this->rowLetter[1]);
 		return rowLetters;
+	}
+	void setRowLetters(const char* letters) {
+		if (strlen(letters) > 2)throw exception("Too many letters!");
+		this->rowLetter[0] = letters[0];
+		this->rowLetter[1] = letters[1];
 	}
 
 	int getNoOfSeats() const {
@@ -300,13 +348,25 @@ struct Row {
 		this->noOfSeats = noOfSeats;
 	}
 
-	Row(int noOfSeats) {
+	Row(int noOfSeats, const char* rowLetters) {
 		this->setNoOfSeats(noOfSeats);
+		this->setRowLetters(rowLetters);
+		int seatNo{ 1 };
 		this->seat = new Seat * [noOfSeats];
+		for (int i = 0; i < noOfSeats; i++) {
+			this->seat[i] = new Seat(seatNo);
+			seatNo++;
+		}
 	}
 
-	Row() : noOfSeats(Utility::MIN_ROW_SEAT_NO) {
-		
+	Row(const char* rowLetters) : noOfSeats(Utility::MIN_ROW_SEAT_NO) {
+		this->setRowLetters(rowLetters);
+		int seatNo{ 1 };
+		this->seat = new Seat * [noOfSeats];
+		for (int i = 0; i < noOfSeats; i++) {
+			this->seat[i] = new Seat(seatNo);
+			seatNo++;
+		}
 	}
 
 	Row(Row& row) {
@@ -315,6 +375,10 @@ struct Row {
 			this->rowLetter[0]++;
 		}
 		else this->rowLetter[1]++;
+		this->seat = new Seat * [noOfSeats];
+		for (int i = 0; i < noOfSeats; i++) {
+			this->seat[i] = row.seat[i];
+		}
 	}
 
 	~Row() {
@@ -323,6 +387,14 @@ struct Row {
 
 	Row& operator=(Row& row) {
 		this->setNoOfSeats(row.noOfSeats);
+		if (row.rowLetter[1] == 'Z') {
+			this->rowLetter[0]++;
+		}
+		else this->rowLetter[1]++;
+		this->seat = new Seat * [noOfSeats];
+		for (int i = 0; i < noOfSeats; i++) {
+			this->seat[i] = row.seat[i];
+		}
 		return *this;
 	}
 
@@ -351,6 +423,11 @@ private:
 	int noOfSeats{};
 	Seat** seat{};
 };
+
+void operator<<(ostream os, Row& row) {
+	os << "\nRow seats number is " << row.getNoOfSeats();
+	os << "\nRow letters are " << row.getRowLetters();
+}
 
 struct Zone {
 	string getNameOfZone() const {
@@ -386,6 +463,10 @@ struct Zone {
 		this->features[this->noOfFeatures++] = newFeature;
 	}
 
+	string* getFeatures() {
+		return Utility::copyStringArray(this->features, this->noOfFeatures);
+	}
+
 	Zone(string nameOfZone, float priceOfZone, int noOfRows, string* features, int noOfFeatures) {
 		this->setNameOfZone(nameOfZone);
 		this->setNoOfRows(noOfRows);
@@ -395,16 +476,29 @@ struct Zone {
 		for (int i = 0; i < noOfFeatures; i++) {
 			this->features[i] = features[i];
 		}
+		string rowLetters = { "AA" };
 		this->row = new Row * [noOfRows];
 		for (int i = 0; i < noOfRows; i++) {
-			this->row[i] = new Row();
+			this->row[i] = new Row(rowLetters.c_str());
+			if (rowLetters[1] == 'Z') {
+				rowLetters[1] = 'A';
+				rowLetters[0]++;
+			}
+			else rowLetters[1]++;
 		}
 	}
 
 	Zone(string nameOfZone) : priceOfZone(Utility::MIN_ZONE_PRICE), noOfRows(Utility::MIN_ROW_SEAT_NO) {
 		this->setNameOfZone(nameOfZone);
+		string rowLetters = { "AA" };
+		this->row = new Row * [noOfRows];
 		for (int i = 0; i < noOfRows; i++) {
-			this->row[i] = new Row();
+			this->row[i] = new Row(rowLetters.c_str());
+			if (rowLetters[1] == 'Z') {
+				rowLetters[1] = 'A';
+				rowLetters[0]++;
+			}
+			else rowLetters[1]++;
 		}
 	}
 
@@ -412,8 +506,9 @@ struct Zone {
 		this->setNameOfZone(zone.getNameOfZone());
 		this->setPriceOfZone(zone.getPriceOfZone());
 		this->setNoOfRows(zone.getNoOfRows());
+		this->row = new Row * [noOfRows];
 		for (int i = 0; i < noOfRows; i++) {
-			this->row[i] = new Row();
+			this->row[i] = zone.row[i];
 		}
 	}
 
@@ -425,6 +520,10 @@ struct Zone {
 		this->setNameOfZone(zone.getNameOfZone());
 		this->setPriceOfZone(zone.getPriceOfZone());
 		this->setNoOfRows(zone.getNoOfRows());
+		this->row = new Row * [noOfRows];
+		for (int i = 0; i < noOfRows; i++) {
+			this->row[i] = zone.row[i];
+		}
 		return *this;
 	}
 
@@ -479,6 +578,17 @@ private:
 	int noOfFeatures{};
 	Row** row{};
 };
+
+void operator<<(ostream os, Zone& zone) {
+	os << "\nZone name is " << zone.getNameOfZone();
+	os << "\nZone price is " << zone.getPriceOfZone();
+	os << "\nZone rows number is " << zone.getNoOfRows();
+	os << "\nZone features are ";
+	string* featureArray = zone.getFeatures();
+	for (int i = 0; i < zone.getNoOfFeatures(); i++) {
+		os << featureArray[i] << " ";
+	}
+}
 
 struct Event {
 	string getName() const {
@@ -542,6 +652,9 @@ struct Event {
 
 	int getNoOfSponsors() const {
 		return this->noOfSponsors;
+	}
+	string* getSponsors() {
+		return Utility::copyStringArray(this->sponsors, this->noOfSponsors);
 	}
 	
 	void addSponsor(string newSponsor) {
@@ -660,3 +773,16 @@ private:
 	int noOfSponsors{};
 	Zone** zone{};
 };
+
+void operator<<(ostream os, Event& event) {
+	os << "\nEvent name is " << event.getName();
+	os << "\nEvent location is " << event.getLocation();
+	os << "\nEvent date is " << event.getDate();
+	os << "\nEvent opening time is " << event.getTime();
+	os << "\nEvent zones number is " << event.getNoOfZones();
+	os << "\nEvent sponsors are ";
+	string* sponsors = event.getSponsors();
+	for (int i = 0; i < event.getNoOfSponsors(); i++) {
+		os << sponsors[i] << " ";
+	}
+}
