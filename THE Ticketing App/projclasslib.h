@@ -117,6 +117,7 @@ struct Ticket {
 	}
 
 	Ticket& operator=(Ticket& ticket) {
+		if (*this == ticket)return *this;
 		this->noOfAttributes = ticket.noOfAttributes;
 		if (ticket.noOfAttributes != 0) {
 			string* attributes = new string[ticket.noOfAttributes];
@@ -179,21 +180,15 @@ private:
 
 int Ticket::id_no = UINT64_MAX;
 
-void operator<<(ostream os, Ticket& ticket) {
+ostream& operator<<(ostream os, Ticket& ticket) {
 	os << "\nTicket ID is " << ticket.getTicketID();
 	os << "\nTicket attributes are ";
 	string* featureArray = ticket.getAttributes();
 	for (int i = 0; i < ticket.getNumberOfAttributes(); i++) {
 		os << featureArray[i] << " ";
 	}
+	return os;
 }
-
-//istream& operator>>(istream is, Ticket& ticket) {
-//	string newAttribute{};
-//	cout << "\nNew attribute is ";
-//	is >> newAttribute;
-//	ticket.addAttribute(newAttribute);
-//}
 
 struct Seat {
 	int getSeatNo() const {
@@ -272,6 +267,7 @@ struct Seat {
 	}
 
 	Seat& operator=(Seat& seat) {
+		if (*this == seat)return *this;
 		this->setAccesibility(seat.accesible);
 		this->seatNo = seat.seatNo + 1;
 		this->noOfColors = seat.noOfColors;
@@ -332,7 +328,7 @@ private:
 	Ticket* ticket{};
 };
 
-void operator<<(ostream os, Seat& seat) {
+ostream& operator<<(ostream os, Seat& seat) {
 	os << "\nSeat accesibility state: " << seat.getAccesibility();
 	os << "\nSeat number is " << seat.getSeatNo();
 	os << "\nSeat colors are ";
@@ -340,15 +336,16 @@ void operator<<(ostream os, Seat& seat) {
 	for (int i = 0; i < seat.getNoOfColors(); i++) {
 		os << colorArray[i] << " ";
 	}
+	return os;
 }
 
 struct Row {
 	string getRowLetters() const {
-		string rowLetters = string(1, this->rowLetter[0]) + string(1, this->rowLetter[1]);
-		return rowLetters;
+		string result = string(this->rowLetter, 2);
+		return result;
 	}
-	void setRowLetters(const char* letters) {
-		if (strlen(letters) > 2)throw exception("Too many letters!");
+	void setRowLetters(string letters) {
+		if (letters.size() > 2)throw exception("Too many letters!");
 		this->rowLetter[0] = letters[0];
 		this->rowLetter[1] = letters[1];
 	}
@@ -366,18 +363,27 @@ struct Row {
 		return this->seat[index];
 	}
 
-	Row(int noOfSeats, const char* rowLetters) {
+	Row(int noOfSeats, string rowLetters) {
 		this->setNoOfSeats(noOfSeats);
 		this->setRowLetters(rowLetters);
-		int seatNo{ 1 };
+		int seatNo{ 1 }, noOfColors{ 0 };
+		string* colors{};
 		this->seat = new Seat * [noOfSeats];
 		for (int i = 0; i < noOfSeats; i++) {
-			this->seat[i] = new Seat(seatNo);
+			cout << "Number of colors of seat " << i << " is ";
+			cin >> noOfColors;
+			if (colors != nullptr)delete[] colors;
+			colors = new string[noOfColors];
+			for (int j = 0; j < noOfColors; j++) {
+				cout << "Color number " << j << " is ";
+				cin >> colors[j];
+			}
+			this->seat[i] = new Seat(seatNo, colors, noOfColors);
 			seatNo++;
 		}
 	}
 
-	Row(const char* rowLetters) : noOfSeats(Utility::MIN_ROW_SEAT_NO) {
+	Row(string rowLetters) : noOfSeats(Utility::MIN_ROW_SEAT_NO) {
 		this->setRowLetters(rowLetters);
 		int seatNo{ 1 };
 		this->seat = new Seat * [noOfSeats];
@@ -404,6 +410,7 @@ struct Row {
 	}
 
 	Row& operator=(Row& row) {
+		if (*this == row)return *this;
 		this->setNoOfSeats(row.noOfSeats);
 		if (row.rowLetter[1] == 'Z') {
 			this->rowLetter[0]++;
@@ -442,9 +449,10 @@ private:
 	Seat** seat{};
 };
 
-void operator<<(ostream os, Row& row) {
+ostream& operator<<(ostream os, Row& row) {
 	os << "\nRow seats number is " << row.getNoOfSeats();
 	os << "\nRow letters are " << row.getRowLetters();
+	return os;
 }
 
 struct Zone {
@@ -500,9 +508,12 @@ struct Zone {
 			this->features[i] = features[i];
 		}
 		string rowLetters = { "AA" };
+		int noOfSeats{};
 		this->row = new Row * [noOfRows];
 		for (int i = 0; i < noOfRows; i++) {
-			this->row[i] = new Row(rowLetters.c_str());
+			cout << "Number of seats of row " << i << " is ";
+			cin >> noOfSeats;
+			this->row[i] = new Row(noOfSeats, rowLetters);
 			if (rowLetters[1] == 'Z') {
 				rowLetters[1] = 'A';
 				rowLetters[0]++;
@@ -516,7 +527,7 @@ struct Zone {
 		string rowLetters = { "AA" };
 		this->row = new Row * [noOfRows];
 		for (int i = 0; i < noOfRows; i++) {
-			this->row[i] = new Row(rowLetters.c_str());
+			this->row[i] = new Row(rowLetters);
 			if (rowLetters[1] == 'Z') {
 				rowLetters[1] = 'A';
 				rowLetters[0]++;
@@ -540,6 +551,7 @@ struct Zone {
 	}
 
 	Zone& operator=(Zone& zone) {
+		if (*this == zone)return *this;
 		this->setNameOfZone(zone.getNameOfZone());
 		this->setPriceOfZone(zone.getPriceOfZone());
 		this->setNoOfRows(zone.getNoOfRows());
@@ -602,7 +614,7 @@ private:
 	Row** row{};
 };
 
-void operator<<(ostream os, Zone& zone) {
+ostream& operator<<(ostream os, Zone& zone) {
 	os << "\nZone name is " << zone.getNameOfZone();
 	os << "\nZone price is " << zone.getPriceOfZone();
 	os << "\nZone rows number is " << zone.getNoOfRows();
@@ -611,6 +623,7 @@ void operator<<(ostream os, Zone& zone) {
 	for (int i = 0; i < zone.getNoOfFeatures(); i++) {
 		os << featureArray[i] << " ";
 	}
+	return os;
 }
 
 struct Event {
@@ -671,6 +684,7 @@ struct Event {
 	}
 	void setNoOfZones(int noOfZones) {
 		if (noOfZones<Utility::MIN_ZONE_NO || noOfZones>Utility::MAX_ZONE_NO)throw exception("Number of zones outside of boundaries!");
+		this->noOfZones = noOfZones;
 	}
 
 	int getNoOfSponsors() const {
@@ -701,10 +715,25 @@ struct Event {
 		this->setNoOfZones(noOfZones);
 		this->zone = new Zone * [noOfZones];
 		string name{};
+		float price{};
+		int noOfRows{}, noOfFeatures{};
+		string* features{};
 		for (int i = 0; i < noOfZones; i++) {
 			cout << "Name of zone " << i << " is ";
 			cin >> name;
-			this->zone[i] = new Zone(name);
+			cout << "Price of zone " << i << " is ";
+			cin >> price;
+			cout << "Number of rows of zone " << i << " is ";
+			cin >> noOfRows;
+			cout << "Number of features of zone " << i << " is ";
+			cin >> noOfFeatures;
+			if (features != nullptr)delete[] features;
+			features = new string[noOfFeatures];
+			for (int j = 0; j < noOfFeatures; j++) {
+				cout << "Feature number " << j << " is ";
+				cin>>features[j];
+			}
+			this->zone[i] = new Zone(name, price, noOfRows, features, noOfFeatures);
 		}
 	}
 
@@ -738,6 +767,7 @@ struct Event {
 	}
 
 	Event& operator=(Event& event) {
+		if (*this == event)return *this;
 		this->setDate(event.getDate());
 		this->setTime(event.getTime());
 		this->setLocation(event.getLocation());
@@ -803,7 +833,7 @@ private:
 	Zone** zone{};
 };
 
-void operator<<(ostream os, Event& event) {
+ostream& operator<<(ostream os, Event& event) {
 	os << "\nEvent name is " << event.getName();
 	os << "\nEvent location is " << event.getLocation();
 	os << "\nEvent date is " << event.getDate();
@@ -814,4 +844,5 @@ void operator<<(ostream os, Event& event) {
 	for (int i = 0; i < event.getNoOfSponsors(); i++) {
 		os << sponsors[i] << " ";
 	}
+	return os;
 }

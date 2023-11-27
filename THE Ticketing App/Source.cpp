@@ -3,6 +3,57 @@
 
 using namespace std;
 
+void buyTicket(Event& event) {
+	Zone* currentZone{};
+	Row* currentRow{};
+	Seat* currentSeat{};
+
+	string selectedZone{}, selectedRow{};
+	int selectedSeat{};
+	cout << "In which zone do you wish to buy the ticket?" << endl;
+	cin >> selectedZone;
+
+	for (int i = 0; i < event.getNoOfZones(); i++) {
+		if (event.getZone(i)->getNameOfZone() == selectedZone) {
+			currentZone = event.getZone(i);
+			break;
+		}
+	}
+
+	if (currentZone != nullptr) {
+		cout << "On which row do you wish to stay? Row format is XX where X is a letter of the English alphabet." << endl;
+		cin >> selectedRow;
+		for (int i = 0; i < currentZone->getNoOfRows(); i++) {
+			if (currentZone->getRow(i)->getRowLetters() == selectedRow) {
+				currentRow = currentZone->getRow(i);
+				break;
+			}
+		}
+	}
+
+	if (currentRow != nullptr) {
+		cout << "Which seat do you want?" << endl;
+		cin >> selectedSeat;
+		for (int i = 0; i < currentRow->getNoOfSeats(); i++) {
+			if (currentRow->getSeat(i)->getSeatNo() == selectedSeat) {
+				currentSeat = currentRow->getSeat(i);
+				break;
+			}
+		}
+	}
+
+	if (currentSeat != nullptr) {
+		if (currentSeat->isSold())throw exception("Seat is sold!");
+		currentSeat->sellTicket();
+		cout << "Ticket bought succesfully! Your ID is " << currentSeat->getTicket()->getTicketID() << endl;
+	}
+
+	bool anotherTicket{};
+	cout << endl << "Do you wish to buy another ticket? 1 for yes, 0 for no." << endl;
+	cin >> anotherTicket;
+	if (anotherTicket)buyTicket(event);
+}
+
 int main() {
 	string name{}, location{}, time{}, date{};
 	int noOfSponsors{}, noOfZones{};
@@ -26,34 +77,10 @@ int main() {
 	cout << "How many zones are there?" << endl;
 	cin >> noOfZones;
 	Event event(name, location, date, time, sponsors, noOfSponsors, noOfZones);
-	bool option{};
+
+
+	bool wannaBuyTicket{};
 	cout << "\nDo you wish to buy tickets for the created event? 0 for no, 1 for yes." << endl;
-	cin >> option;
-	if (option == 0)return 0;
-	string selectedZone{}, selectedRow{};
-	int selectedSeat{};
-	cout << "In which zone do you wish to buy the ticket?" << endl;
-	cin >> selectedZone;
-	for (int i = 0; i < event.getNoOfZones(); i++) {
-		if (event.getZone(i)->getNameOfZone() == selectedZone) {
-			cout << "On which row do you wish to stay?" << endl;
-			cin >> selectedRow;
-			for (int j = 0; j < event.getZone(i)->getNoOfRows(); i++) {
-				if (event.getZone(i)->getRow(j)->getRowLetters() == selectedRow) {
-					cout << "Which seat do you want?" << endl;
-					cin >> selectedSeat;
-					for (int k = 0; k < event.getZone(i)->getRow(j)->getNoOfSeats(); k++) {
-						if (event.getZone(i)->getRow(j)->getSeat(k)->getSeatNo() == selectedSeat) {
-							if (event.getZone(i)->getRow(j)->getSeat(k)->isSold())throw exception("Seat is sold!");
-							event.getZone(i)->getRow(j)->getSeat(k)->sellTicket();
-							cout << "Ticket bought succesfully! Your ID is " << event.getZone(i)->getRow(j)->getSeat(k)->getTicket()->getTicketID() << endl;
-							break;
-						}
-					}
-					break;
-				}
-			}
-			break;
-		}
-	}
+	cin >> wannaBuyTicket;
+	if (wannaBuyTicket)buyTicket(event);
 }
